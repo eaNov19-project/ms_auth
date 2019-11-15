@@ -72,4 +72,10 @@ public class JwtTokenUtil implements Serializable {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
+    public String getTokenFromBearer(String bearerToken){
+        if(bearerToken.startsWith("Bearer"))
+            return bearerToken.substring(6).trim();
+        return bearerToken;
+    }
 }

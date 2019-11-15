@@ -1,14 +1,14 @@
 package ea.sof.ms_auth.entities;
 
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @ToString
 @Table(name = "user")

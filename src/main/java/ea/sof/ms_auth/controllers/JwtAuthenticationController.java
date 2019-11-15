@@ -4,15 +4,13 @@ package ea.sof.ms_auth.controllers;
 import ea.sof.ms_auth.config.JwtTokenUtil;
 import ea.sof.ms_auth.config.JwtUserDetailsService;
 import ea.sof.ms_auth.entities.User;
-import ea.sof.ms_auth.model.JwtRequest;
-import ea.sof.ms_auth.model.JwtResponse;
 import ea.sof.ms_auth.services.UserService;
+import ea.sof.shared.models.Auth;
+import ea.sof.shared.models.Response;
+import ea.sof.shared.models.TokenUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -30,40 +28,68 @@ public class JwtAuthenticationController {
     private UserService userService;
 
     @PostMapping("/add-auth")
-    public ResponseEntity<?> addAuth(@RequestBody JwtRequest auth) throws Exception {
+    public ResponseEntity<Response> addAuth(@RequestBody Auth auth){
 
-        //should check username exists or not in db, then add
-        User user = userService.findByUsername(auth.getUsername());
-        if(user != null)
-            return ResponseEntity.ok(2);
+        try{
+            //should check username exists or not in db, then add
+            User user = userService.findByUsername(auth.getUsername());
+            if(user != null)
+                return ResponseEntity.ok(new Response(false, "User existed already!" ));
 
-        User newUser = new User();
-        newUser.setUsername(auth.getUsername());
-        newUser.setPassword(auth.getPassword());
-        userService.saveUser(newUser);
+            User newUser = new User();
+            newUser.setUsername(auth.getUsername());
+            newUser.setPassword(auth.getPassword());
+            userService.saveUser(newUser);
 
-        return ResponseEntity.ok(1);
+            Response response = new Response(true, "Add authentication successuflly!");
+            response.getData().put("auth", new TokenUser(newUser.getUsername()));
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e){
+            Response response = new Response(false, "Exception!");
+            response.getData().put("exception", e);
+            return ResponseEntity.ok(response);
+        }
+
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody JwtRequest authenticationRequest){
+    public ResponseEntity<Response> login(@RequestBody Auth auth){
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
-            UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(auth.getUsername(), auth.getPassword()));
+            UserDetails userDetails = userDetailsService.loadUserByUsername(auth.getUsername());
             String token = jwtTokenUtil.generateToken(userDetails);
-            return ResponseEntity.ok(new JwtResponse(token));
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(-1);
+            Response response = new Response(true, "Login successfully!");
+            response.getData().put("token", token);
+            return ResponseEntity.ok(response);
         }
          catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+             Response response = new Response(false, "Exception!");
+             response.getData().put("exception", e);
+             return ResponseEntity.ok(response);
         }
-
     }
 
     @GetMapping("/validate-token")
-    public ResponseEntity<?> validateToken(@RequestHeader(name="Authorization", required = false) String token){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Response> validateToken(@RequestHeader(name="Authorization", required = false) String token){
+
+        try{
+            String jwttoken = jwtTokenUtil.getTokenFromBearer(token);
+            String username = jwtTokenUtil.getUsernameFromToken(jwttoken);
+            User user = userService.findByUsername(username);
+            TokenUser tokenUser = new TokenUser(user.getUsername());
+            Response response = new Response(true, "Token valid");
+            response.getData().put("decoded_token", tokenUser);
+            return ResponseEntity.ok(response);
+        }
+        catch (Exception e) {
+            Response response = new Response(false, "Exception!");
+            response.getData().put("exception", e);
+            return ResponseEntity.ok(response);
+        }
+
+
+
     }
 
 
