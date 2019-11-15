@@ -6,5 +6,5 @@ public interface UserService {
 
     User saveUser(User user);
     User findUser(Integer id);
-    User findByUsername(String username);
+    User findByEmail(String email);
 }

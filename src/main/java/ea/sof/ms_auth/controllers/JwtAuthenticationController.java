@@ -32,17 +32,17 @@ public class JwtAuthenticationController {
 
         try{
             //should check username exists or not in db, then add
-            User user = userService.findByUsername(auth.getUsername());
+            User user = userService.findByEmail(auth.getEmail());
             if(user != null)
                 return ResponseEntity.ok(new Response(false, "User existed already!" ));
 
             User newUser = new User();
-            newUser.setUsername(auth.getUsername());
+            newUser.setEmail(auth.getEmail());
             newUser.setPassword(auth.getPassword());
             userService.saveUser(newUser);
 
             Response response = new Response(true, "Add authentication successuflly!");
-            response.getData().put("auth", new TokenUser(newUser.getUsername()));
+            response.getData().put("auth", new TokenUser(newUser.getId(), newUser.getEmail()));
             return ResponseEntity.ok(response);
         }
         catch(Exception e){
@@ -56,8 +56,8 @@ public class JwtAuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestBody Auth auth){
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(auth.getUsername(), auth.getPassword()));
-            UserDetails userDetails = userDetailsService.loadUserByUsername(auth.getUsername());
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(auth.getEmail(), auth.getPassword()));
+            UserDetails userDetails = userDetailsService.loadUserByUsername(auth.getEmail());
             String token = jwtTokenUtil.generateToken(userDetails);
             Response response = new Response(true, "Login successfully!");
             response.getData().put("token", token);
@@ -75,9 +75,9 @@ public class JwtAuthenticationController {
 
         try{
             String jwttoken = jwtTokenUtil.getTokenFromBearer(token);
-            String username = jwtTokenUtil.getUsernameFromToken(jwttoken);
-            User user = userService.findByUsername(username);
-            TokenUser tokenUser = new TokenUser(user.getUsername());
+            String email = jwtTokenUtil.getUsernameFromToken(jwttoken);
+            User user = userService.findByEmail(email);
+            TokenUser tokenUser = new TokenUser(user.getId(), user.getEmail());
             Response response = new Response(true, "Token valid");
             response.getData().put("decoded_token", tokenUser);
             return ResponseEntity.ok(response);
