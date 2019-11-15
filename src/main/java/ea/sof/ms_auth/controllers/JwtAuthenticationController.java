@@ -33,16 +33,16 @@ public class JwtAuthenticationController {
     public ResponseEntity<?> addAuth(@RequestBody JwtRequest auth) throws Exception {
 
         //should check username exists or not in db, then add
-//        final UserDetails userDetails = userDetailsService.loadUserByUsername(newAuthenticate.getUsername());
-//        if(userDetails != null)
-//            return ResponseEntity.ok("Username existed in the system!!!");
+        User user = userService.findByUsername(auth.getUsername());
+        if(user != null)
+            return ResponseEntity.ok(2);
 
         User newUser = new User();
         newUser.setUsername(auth.getUsername());
         newUser.setPassword(auth.getPassword());
         userService.saveUser(newUser);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(1);
     }
 
     @PostMapping("/login")
@@ -53,6 +53,9 @@ public class JwtAuthenticationController {
             String token = jwtTokenUtil.generateToken(userDetails);
             return ResponseEntity.ok(new JwtResponse(token));
         } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(-1);
+        }
+         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
 
