@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-ms
+  labels:
+    app: auth-ms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-ms
+  template:
+    metadata:
+      labels:
+        app: auth-ms
+    spec:
+      containers:
+        - name: auth-ms
+          image: islamahmad/eaproj-authms:1.0.2
+          env:
+           - name: MYSQL_PASSWORD
+             valueFrom:
+               configMapKeyRef:
+                 name: auth-ms
+                 key: MYSQL_PASSWORD
+           - name: SERVICE_API_KEY
+             valueFrom:
+               configMapKeyRef:
+                 name: auth-ms
+                 key: SERVICE_API_KEY
+           - name: JWT_SECRET
+             valueFrom:
+               configMapKeyRef:
+                 name: auth-ms
+                 key: JWT_SECRET
+           - name: MYSQL_PORT
+             valueFrom:
+               configMapKeyRef:
+                 name: auth-ms
+                 key: MYSQL_PORT
+           - name: MYSQL_USER
+             valueFrom:
+               configMapKeyRef:
+                 name: auth-ms
+                 key: MYSQL_USER
+           - name: MYSQL_HOST
+             valueFrom:
+               configMapKeyRef:
+                 name: auth-ms
+                 key: MYSQL_HOST
