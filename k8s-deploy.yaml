@@ -5,7 +5,7 @@ metadata:
   labels:
     app: auth-ms
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: auth-ms
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: auth-ms
-          image: islamahmad/eaproj-authms:1.0.2
+          image: islamahmad/eaproj-authms:1.0.3
           env:
            - name: MYSQL_PASSWORD
              valueFrom:
@@ -48,3 +48,8 @@ spec:
                configMapKeyRef:
                  name: auth-ms
                  key: MYSQL_HOST
+           - name: DB_NAME
+             valueFrom:
+               configMapKeyRef:
+                 name: auth-ms
+                 key: DB_NAME
