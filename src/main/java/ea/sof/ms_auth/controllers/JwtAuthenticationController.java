@@ -25,99 +25,100 @@ import java.net.UnknownHostException;
 @CrossOrigin
 @RequestMapping("/auth")
 public class JwtAuthenticationController {
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-    @Autowired
-    private JwtUserDetailsService userDetailsService;
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
+	@Autowired
+	private JwtUserDetailsService userDetailsService;
+	@Autowired
+	private UserService userService;
 
-    @GetMapping("/health")
-    public ResponseEntity<?> index() {
-        String host = "Unknown host";
-        try {
-            host = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+	@GetMapping("/health")
+	public ResponseEntity<?> index() {
+		String host = "Unknown host";
+		try {
+			host = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 
-        return new ResponseEntity<>("Auth service. Host: " + host, HttpStatus.OK);
-    }
+		return new ResponseEntity<>("Auth service. Host: " + host, HttpStatus.OK);
+	}
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationController.class);
 
-    @PostMapping("/add-auth")
-    public ResponseEntity<Response> addAuth(@RequestBody Auth auth){
+	@PostMapping("/add-auth")
+	public ResponseEntity<Response> addAuth(@RequestBody Auth auth) {
 
-        try{
-            LOGGER.info("trying to add to authentication");
-            //should check username exists or not in db, then add
-            User user = userService.findByEmail(auth.getEmail());
-            if(user != null)
-                return ResponseEntity.ok(new Response(false, "User existed already!" ));
+		try {
+			LOGGER.info("trying to add to authentication");
+			//should check username exists or not in db, then add
+			User user = userService.findByEmail(auth.getEmail());
+			if (user != null) {
+				user.setPassword(auth.getPassword());
+				userService.saveUser(user);
 
-            User newUser = new User();
-            newUser.setEmail(auth.getEmail());
-            newUser.setPassword(auth.getPassword());
-            userService.saveUser(newUser);
+				LOGGER.warn("User existed already with email: " + auth.getEmail());
+				return ResponseEntity.ok(new Response(true, "User existed already!"));
+			}
 
-            Response response = new Response(true, "Add authentication successuflly!");
-            response.getData().put("auth", new TokenUser(newUser.getId(), newUser.getEmail()));
-            return ResponseEntity.ok(response);
-        }
-        catch(Exception e){
-            Response response = new Response(false, "Exception!");
-            LOGGER.error("addAuth method failed");
-            response.getData().put("exception", e);
-            return ResponseEntity.ok(response);
-        }
+			User newUser = new User();
+			newUser.setEmail(auth.getEmail());
+			newUser.setPassword(auth.getPassword());
+			userService.saveUser(newUser);
 
-    }
+			Response response = new Response(true, "Add authentication successfully!");
+			response.getData().put("auth", new TokenUser(newUser.getId(), newUser.getEmail()));
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			Response response = new Response(false, "Exception!");
+			LOGGER.error("addAuth method failed: " + e.getMessage());
+			response.addObject("exception", e);
+			return ResponseEntity.ok(response);
+		}
 
-    @PostMapping("/login")
-    public ResponseEntity<Response> login(@RequestBody Auth auth){
-        try {
-            LOGGER.info("some user is signing-in");
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(auth.getEmail(), auth.getPassword()));
-            UserDetails userDetails = userDetailsService.loadUserByUsername(auth.getEmail());
-            String token = jwtTokenUtil.generateToken(userDetails);
-            Response response = new Response(true, "Login successfully!");
-            response.getData().put("token", token);
-            return ResponseEntity.ok(response);
-        }
-         catch (Exception e) {
-             Response response = new Response(false, "Exception!");
-             LOGGER.info("user sign-in failed");
-             response.getData().put("exception", e);
-             return ResponseEntity.ok(response);
-        }
-    }
+	}
 
-    @GetMapping("/validate-token")
-    public ResponseEntity<Response> validateToken(@RequestHeader(name="Authorization", required = false) String token){
+	@PostMapping("/login")
+	public ResponseEntity<Response> login(@RequestBody Auth auth) {
+		try {
+			LOGGER.info("some user is signing-in");
+			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(auth.getEmail(), auth.getPassword()));
+			UserDetails userDetails = userDetailsService.loadUserByUsername(auth.getEmail());
+			String token = jwtTokenUtil.generateToken(userDetails);
+			Response response = new Response(true, "Login successfully!");
+			response.getData().put("token", token);
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			Response response = new Response(false, "Exception!");
+			LOGGER.info("user sign-in failed");
+			response.getData().put("exception", e);
+			return ResponseEntity.ok(response);
+		}
+	}
 
-        try{
-            LOGGER.info("trying to validate token");
-            String jwttoken = jwtTokenUtil.getTokenFromBearer(token);
-            String email = jwtTokenUtil.getUsernameFromToken(jwttoken);
-            User user = userService.findByEmail(email);
-            TokenUser tokenUser = new TokenUser(user.getId(), user.getEmail());
-            Response response = new Response(true, "Token valid");
-            response.getData().put("decoded_token", tokenUser);
-            return ResponseEntity.ok(response);
-        }
-        catch (Exception e) {
-            LOGGER.error("token validation failed");
-            Response response = new Response(false, "Exception!");
-            response.getData().put("exception", e);
-            return ResponseEntity.ok(response);
-        }
+	@GetMapping("/validate-token")
+	public ResponseEntity<Response> validateToken(@RequestHeader(name = "Authorization", required = false) String token) {
+
+		try {
+			LOGGER.info("trying to validate token");
+			String jwttoken = jwtTokenUtil.getTokenFromBearer(token);
+			String email = jwtTokenUtil.getUsernameFromToken(jwttoken);
+			User user = userService.findByEmail(email);
+			TokenUser tokenUser = new TokenUser(user.getId(), user.getEmail());
+			Response response = new Response(true, "Token valid");
+			response.getData().put("decoded_token", tokenUser);
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			LOGGER.error("token validation failed");
+			Response response = new Response(false, "Exception!");
+			response.getData().put("exception", e);
+			return ResponseEntity.ok(response);
+		}
 
 
-
-    }
+	}
 
 
 }

@@ -1,5 +1,5 @@
 DOCKERHUBREPO=islamahmad
-IMAGE=${DOCKERHUBREPO}/eaproj-authms:1.0.5
+IMAGE=${DOCKERHUBREPO}/eaproj-authms:1.0.6
 
 # ===== Maven =====
 maven-rebuild:
