@@ -12,14 +12,15 @@ import java.net.UnknownHostException;
 @RestController
 public class HomeController {
 
-    @GetMapping("/")
-    public ResponseEntity<?> index() {
-        String host = "Unknown host";
-        try {
-            host = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+	@GetMapping("/")
+	public ResponseEntity<?> index() {
+		String host = "Unknown host";
+		try {
+			host = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 
-        return new ResponseEntity<>("Auth service. Host: " + host, HttpStatus.OK);
-    }}
+		return new ResponseEntity<>("Auth service. Host: " + host, HttpStatus.OK);
+	}
+}

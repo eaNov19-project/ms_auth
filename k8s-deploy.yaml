@@ -16,40 +16,43 @@ spec:
     spec:
       containers:
         - name: auth-ms
-          image: islamahmad/eaproj-authms:1.0.4
+          image: islamahmad/eaproj-authms:1.0.5
           env:
-           - name: MYSQL_PASSWORD
-             valueFrom:
-               configMapKeyRef:
-                 name: auth-ms
-                 key: MYSQL_PASSWORD
-           - name: SERVICE_API_KEY
-             valueFrom:
-               configMapKeyRef:
-                 name: auth-ms
-                 key: SERVICE_API_KEY
-           - name: JWT_SECRET
-             valueFrom:
-               configMapKeyRef:
-                 name: auth-ms
-                 key: JWT_SECRET
-           - name: MYSQL_PORT
-             valueFrom:
-               configMapKeyRef:
-                 name: auth-ms
-                 key: MYSQL_PORT
-           - name: MYSQL_USER
-             valueFrom:
-               configMapKeyRef:
-                 name: auth-ms
-                 key: MYSQL_USER
-           - name: MYSQL_HOST
-             valueFrom:
-               configMapKeyRef:
-                 name: auth-ms
-                 key: MYSQL_HOST
-           - name: DB_NAME
-             valueFrom:
-               configMapKeyRef:
-                 name: auth-ms
-                 key: DB_NAME
+            - name: SERVER_PORT
+              value: "8080"
+
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-ms
+                  key: MYSQL_PASSWORD
+            - name: SERVICE_API_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-ms
+                  key: SERVICE_API_KEY
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-ms
+                  key: JWT_SECRET
+            - name: MYSQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-ms
+                  key: MYSQL_PORT
+            - name: MYSQL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-ms
+                  key: MYSQL_USER
+            - name: MYSQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-ms
+                  key: MYSQL_HOST
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-ms
+                  key: DB_NAME

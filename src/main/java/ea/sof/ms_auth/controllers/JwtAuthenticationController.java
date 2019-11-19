@@ -11,11 +11,15 @@ import ea.sof.shared.models.TokenUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @RestController
 @CrossOrigin
@@ -29,6 +33,18 @@ public class JwtAuthenticationController {
     private JwtUserDetailsService userDetailsService;
     @Autowired
     private UserService userService;
+
+    @GetMapping("/health")
+    public ResponseEntity<?> index() {
+        String host = "Unknown host";
+        try {
+            host = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity<>("Auth service. Host: " + host, HttpStatus.OK);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationController.class);
 
