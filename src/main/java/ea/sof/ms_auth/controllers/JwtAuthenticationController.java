@@ -8,6 +8,8 @@ import ea.sof.ms_auth.services.UserService;
 import ea.sof.shared.models.Auth;
 import ea.sof.shared.models.Response;
 import ea.sof.shared.models.TokenUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,10 +30,13 @@ public class JwtAuthenticationController {
     @Autowired
     private UserService userService;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationController.class);
+
     @PostMapping("/add-auth")
     public ResponseEntity<Response> addAuth(@RequestBody Auth auth){
 
         try{
+            LOGGER.info("trying to add to authentication");
             //should check username exists or not in db, then add
             User user = userService.findByEmail(auth.getEmail());
             if(user != null)
@@ -48,6 +53,7 @@ public class JwtAuthenticationController {
         }
         catch(Exception e){
             Response response = new Response(false, "Exception!");
+            LOGGER.error("addAuth method failed");
             response.getData().put("exception", e);
             return ResponseEntity.ok(response);
         }
@@ -57,6 +63,7 @@ public class JwtAuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestBody Auth auth){
         try {
+            LOGGER.info("some user is signing-in");
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(auth.getEmail(), auth.getPassword()));
             UserDetails userDetails = userDetailsService.loadUserByUsername(auth.getEmail());
             String token = jwtTokenUtil.generateToken(userDetails);
@@ -66,6 +73,7 @@ public class JwtAuthenticationController {
         }
          catch (Exception e) {
              Response response = new Response(false, "Exception!");
+             LOGGER.info("user sign-in failed");
              response.getData().put("exception", e);
              return ResponseEntity.ok(response);
         }
@@ -75,6 +83,7 @@ public class JwtAuthenticationController {
     public ResponseEntity<Response> validateToken(@RequestHeader(name="Authorization", required = false) String token){
 
         try{
+            LOGGER.info("trying to validate token");
             String jwttoken = jwtTokenUtil.getTokenFromBearer(token);
             String email = jwtTokenUtil.getUsernameFromToken(jwttoken);
             User user = userService.findByEmail(email);
@@ -84,6 +93,7 @@ public class JwtAuthenticationController {
             return ResponseEntity.ok(response);
         }
         catch (Exception e) {
+            LOGGER.error("token validation failed");
             Response response = new Response(false, "Exception!");
             response.getData().put("exception", e);
             return ResponseEntity.ok(response);

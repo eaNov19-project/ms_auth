@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: auth-ms
-          image: islamahmad/eaproj-authms:1.0.3
+          image: islamahmad/eaproj-authms:1.0.4
           env:
            - name: MYSQL_PASSWORD
              valueFrom:
