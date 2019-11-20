@@ -34,7 +34,7 @@ public class JwtAuthenticationController {
 	@Autowired
 	private UserService userService;
 
-	@Value("${APP_VERSION}")
+	@Value("${app.version}")
     private String appVersion;
 
 	@GetMapping("/health")
@@ -45,8 +45,6 @@ public class JwtAuthenticationController {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-
-
 
 		return new ResponseEntity<>("Auth service (" + appVersion + "). Host: " + host, HttpStatus.OK);
 	}
