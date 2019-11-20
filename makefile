@@ -1,5 +1,5 @@
 DOCKERHUBREPO=islamahmad
-IMAGE=${DOCKERHUBREPO}/eaproj-authms:1.0.9
+IMAGE=${DOCKERHUBREPO}/eaproj-authms:1.0.12
 
 # ===== Maven =====
 maven-rebuild:
@@ -24,5 +24,5 @@ k8-install:
 k8-delete:
 	kubectl delete -f k8s-deploy.yaml
 
-k8-repush-restart: k8-delete docker-push k8-install
+k8-repush-restart: docker-push k8-delete k8-install
 

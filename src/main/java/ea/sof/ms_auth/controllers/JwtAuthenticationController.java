@@ -100,9 +100,9 @@ public class JwtAuthenticationController {
 
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
-			Response response = new Response(false, "Exception!");
-			LOGGER.info("user sign-in failed");
-			response.getData().put("exception", e);
+			Response response = new Response(false, "Wrong user email or password");
+			LOGGER.info("user sign-in failed. Exception: " + e.getMessage());
+//			response.getData().put("exception", e);
 			return ResponseEntity.ok(response);
 		}
 	}

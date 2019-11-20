@@ -16,10 +16,10 @@ spec:
     spec:
       containers:
         - name: auth-ms
-          image: islamahmad/eaproj-authms:1.0.9
+          image: islamahmad/eaproj-authms:1.0.12
           env:
             - name: APP_VERSION
-              value: "islamahmad/eaproj-authms:1.0.9"
+              value: "islamahmad/eaproj-authms:1.0.12"
             - name: SERVER_PORT
               value: "8080"
 
