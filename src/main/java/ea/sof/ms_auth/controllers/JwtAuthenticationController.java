@@ -1,6 +1,5 @@
 package ea.sof.ms_auth.controllers;
 
-
 import ea.sof.ms_auth.config.JwtTokenUtil;
 import ea.sof.ms_auth.config.JwtUserDetailsService;
 import ea.sof.ms_auth.entities.User;
@@ -11,6 +10,7 @@ import ea.sof.shared.models.TokenUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,6 +34,9 @@ public class JwtAuthenticationController {
 	@Autowired
 	private UserService userService;
 
+	@Value("${APP_VERSION}")
+    private String appVersion;
+
 	@GetMapping("/health")
 	public ResponseEntity<?> index() {
 		String host = "Unknown host";
@@ -43,7 +46,9 @@ public class JwtAuthenticationController {
 			e.printStackTrace();
 		}
 
-		return new ResponseEntity<>("Auth service. Host: " + host, HttpStatus.OK);
+
+
+		return new ResponseEntity<>("Auth service (" + appVersion + "). Host: " + host, HttpStatus.OK);
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationController.class);
@@ -86,9 +91,15 @@ public class JwtAuthenticationController {
 			LOGGER.info("some user is signing-in");
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(auth.getEmail(), auth.getPassword()));
 			UserDetails userDetails = userDetailsService.loadUserByUsername(auth.getEmail());
+			if (userDetails == null){
+			    return ResponseEntity.ok(new Response(false, "Wrong user email or password"));
+            }
+
 			String token = jwtTokenUtil.generateToken(userDetails);
+
 			Response response = new Response(true, "Login successfully!");
 			response.getData().put("token", token);
+
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
 			Response response = new Response(false, "Exception!");

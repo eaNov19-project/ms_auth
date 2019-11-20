@@ -7,8 +7,7 @@ data:
   SERVICE_API_KEY: apikey
   MYSQL_HOST: "mysql-1573837923.default.svc.cluster.local"
   MYSQL_PORT: "3306"
-  MYSQL_USER: van
-  MYSQL_PASSWORD: vanpass
+#  MYSQL_USER: van
+#  MYSQL_PASSWORD: vanpass
   JWT_SECRET: jwtsecret
   DB_NAME: db_authenticate
-  # AUTHENTICATE_SERVICE: authentication-service.default.svc.cluster.local:8080
