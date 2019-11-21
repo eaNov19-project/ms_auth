@@ -58,9 +58,12 @@ public class JwtAuthenticationController {
 			LOGGER.info("trying to add to authentication");
 			//should check username exists or not in db, then add
 			User user = userService.findByEmail(auth.getEmail());
+
+			//get the userId coming from user service.
+			Long fromUserviceId = auth.getUserId();
 			if (user != null) {
-				user.setPassword(auth.getPassword());
-				userService.saveUser(user);
+//				user.setPassword(auth.getPassword());
+//				userService.saveUser(user);
 
 				LOGGER.warn("User existed already with email: " + auth.getEmail());
 				return ResponseEntity.ok(new Response(true, "User existed already!"));
@@ -69,10 +72,12 @@ public class JwtAuthenticationController {
 			User newUser = new User();
 			newUser.setEmail(auth.getEmail());
 			newUser.setPassword(auth.getPassword());
+			newUser.setUserId(auth.getUserId());
 			userService.saveUser(newUser);
-
 			Response response = new Response(true, "Add authentication successfully!");
-			response.getData().put("auth", new TokenUser(newUser.getId(), newUser.getEmail()));
+
+			//Here the token is generated using the userId from user service;
+			response.getData().put("auth", new TokenUser(newUser.getUserId(), newUser.getEmail()));
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
 			Response response = new Response(false, "Exception!");
@@ -115,7 +120,7 @@ public class JwtAuthenticationController {
 			String jwttoken = jwtTokenUtil.getTokenFromBearer(token);
 			String email = jwtTokenUtil.getUsernameFromToken(jwttoken);
 			User user = userService.findByEmail(email);
-			TokenUser tokenUser = new TokenUser(user.getId(), user.getEmail());
+			TokenUser tokenUser = new TokenUser(user.getUserId(), user.getEmail());
 			Response response = new Response(true, "Token valid");
 			response.getData().put("decoded_token", tokenUser);
 			return ResponseEntity.ok(response);
